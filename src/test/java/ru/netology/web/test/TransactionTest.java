@@ -31,7 +31,7 @@ public class TransactionTest {
         int destinationCardIndex = 1;
         int amount = 42;
         dashboardPage.transferTo(destinationCardIndex)
-                .Transfer(amount, DataHelper.getFirstCardNumber().getNumber());
+                .transfer(amount, DataHelper.getFirstCardNumber().getNumber());
         var currentBalanceFirst = dashboardPage.getFirstCardBalance();
         var currentBalanceSecond = dashboardPage.getSecondCardBalance();
         Assertions.assertEquals(initialBalanceFirst - amount, currentBalanceFirst);
@@ -46,7 +46,7 @@ public class TransactionTest {
         int destinationCardIndex = 0;
         int amount = 42;
         dashboardPage.transferTo(destinationCardIndex)
-                .Transfer(amount, DataHelper.getSecondCardNumber().getNumber());
+                .transfer(amount, DataHelper.getSecondCardNumber().getNumber());
         var currentBalanceFirst = dashboardPage.getFirstCardBalance();
         var currentBalanceSecond = dashboardPage.getSecondCardBalance();
         Assertions.assertEquals(initialBalanceFirst + amount, currentBalanceFirst);
@@ -63,10 +63,9 @@ public class TransactionTest {
         var transferPage = new TransferPage();
 
         dashboardPage.transferTo(destinationCardIndex)
-                .Transfer(amount, "5589000000000003");
-        transferPage.getNotification().shouldBe(Condition.visible);
-        transferPage.getNotification().shouldHave(Condition.exactText("Ошибка\n" +
-                "Ошибка! Произошла ошибка"));
+                .transfer(amount, "5589000000000003");
+        transferPage.errorNotificationAssert("Ошибка\n" +
+                "Ошибка! Произошла ошибка");
     }
 
     @Test
@@ -78,9 +77,12 @@ public class TransactionTest {
         int amount = 100000;
         var transferPage = new TransferPage();
         dashboardPage.transferTo(destinationCardIndex)
-                .Transfer(amount, DataHelper.getSecondCardNumber().getNumber());
-        transferPage.getNotification().shouldBe(Condition.visible);
-        transferPage.getNotification().shouldHave(Condition.exactText("Ошибка\n" +
-                "Ошибка! На карте отправления недостаточно средств"));
+                .transfer(amount, DataHelper.getSecondCardNumber().getNumber());
+        var currentBalanceFirst = dashboardPage.getFirstCardBalance();
+        var currentBalanceSecond = dashboardPage.getSecondCardBalance();
+        Assertions.assertEquals(initialBalanceFirst, currentBalanceFirst);
+        Assertions.assertEquals(initialBalanceSecond, currentBalanceSecond);
+        transferPage.errorNotificationAssert("Ошибка\n" +
+                "Ошибка! На карте списания недостаточно средств");
     }
 }
